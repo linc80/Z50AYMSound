@@ -1,4 +1,4 @@
-update=19.07.2018 15:01:39
+update=19.07.2018 15:41:01
 version=1
 last_client=kicad
 [pcbnew]
@@ -64,3 +64,13 @@ LibName32=valves
 LibName33=ay-3-8912
 LibName34=Oscillators
 LibName35=PJ-307_JYO-39-5P_audio-jack
+[schematic_editor]
+version=1
+PageLayoutDescrFile=
+PlotDirectoryName=
+SubpartIdSeparator=0
+SubpartFirstId=65
+NetFmtName=
+SpiceForceRefPrefix=0
+SpiceUseNetNumbers=0
+LabSize=60
