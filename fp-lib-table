@@ -1,0 +1,4 @@
+(fp_lib_table
+  (lib (name StereoJack)(type KiCad)(uri "$(KIPRJMOD)/StereoJack.pretty")(options "")(descr ""))
+  (lib (name LiNCLogo)(type KiCad)(uri "$(KIPRJMOD)/LiNCLogo.pretty")(options "")(descr ""))
+)
