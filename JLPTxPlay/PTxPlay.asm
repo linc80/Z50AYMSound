@@ -7,8 +7,9 @@ Release EQU "1"
 
 ;Conditional assembly
 ;1) Version of ROUT (ZX or MSX standards)
-ZX=1
+ZX=0
 MSX=0
+RC=1
 ;2) Current position counter at (START+11)
 CurPosCounter=0
 ;3) Allow channels allocation bits at (START+10)
@@ -44,23 +45,32 @@ Id=1
 ;into RAM or INIT subprogram was not called before.
 
 ;Call MUTE or INIT one more time to mute sound after stopping
-;playing 
+;playing
 
 	ORG #C000
-
+	;ORG #100
+	; ld hl, startupstr
+  ; call print
 ;Test codes (commented)
-;	LD A,2 ;PT2,ABC,Looped
-;	LD (START+10),A
-;	CALL START
+	;LD A,2 ;PT2,ABC,Looped
+	LD A, 0
+	LD (START+10),A
+	CALL START
+	; ld hl, startupstr
+	; call print
 ;	EI
 ;_LP	HALT
-;	CALL START+5
-;	XOR A
-;	IN A,(#FE)
-;	CPL
-;	AND 15
-;	JR Z,_LP
-;	JR START+8
+_LP	CALL START+5
+	call pause
+
+	; XOR A
+	; IN A,(#FE)
+	; CPL
+	; AND 15
+	JR _LP
+	ld hl, endstr
+	call print
+	JR START+8
 
 TonA	EQU 0
 TonB	EQU 2
@@ -296,7 +306,7 @@ TP_2	LD A,H
 	IF CurPosCounter
 	LD (CurPos),A
 	ENDIF
-	
+
 	ENDIF
 
 	LD HL,VARS
@@ -606,7 +616,7 @@ PD_VOL	RRCA
 	RRCA
 	LD (IX-12+CHP.Volume),A
 	JR PD_LP2
-	
+
 PD_EOff	LD (IX-12+CHP.Env_En),A
 	LD (IX-12+CHP.PsInOr),A
 	JR PD_LP2
@@ -825,7 +835,7 @@ C_DELAY	LD A,(BC)
 	INC BC
 	LD (Delay),A
 	RET
-	
+
 SETENV	LD (IX-12+CHP.Env_En),E
 	LD (AYREGS+EnvTp),A
 	LD A,(BC)
@@ -948,7 +958,7 @@ CH_SMPS	LD (IX+CHP.PsInSm),A
 ;Convert PT2 sample to PT3
 		;PT2		PT3
 SamCnv	POP HL  ;BIT 2,C	JR e_
-	POP HL	
+	POP HL
 	LD H,B
 	JR NZ,$+8
 	EX DE,HL
@@ -1295,6 +1305,26 @@ RxCA2	OR E
 ABC
 	ENDIF
 
+	IF RC
+	XOR A
+	LD C,#D8
+	LD HL,AYREGS
+LOUT	OUT (C),A
+	LD C,#D0
+	OUTI
+	LD C,#D8
+	INC A
+	CP 13
+	JR NZ,LOUT
+	OUT (C),A
+	LD A,(HL)
+	AND A
+	RET M
+	LD C,#D0
+	OUT (C),A
+	RET
+	ENDIF
+
 	IF ZX
 	XOR A
 	LD DE,#FFBF
@@ -1302,7 +1332,7 @@ ABC
 	LD HL,AYREGS
 LOUT	OUT (C),A
 	LD B,E
-	OUTI 
+	OUTI
 	LD B,D
 	INC A
 	CP 13
@@ -1323,7 +1353,7 @@ LOUT	OUT (C),A
 	LD HL,AYREGS
 LOUT	OUT (C),A
 	INC C
-	OUTI 
+	OUTI
 	DEC C
 	INC A
 	CP 13
@@ -1507,8 +1537,54 @@ VAR0END	EQU VT_+16 ;INIT zeroes from VARS to VAR0END-1
 
 VARSEND EQU $
 
-MDLADDR EQU $
 
+TX push af
+txbusy     in a,($80)          ; read serial status
+            bit 1,a             ; check status bit 1
+            jr z, txbusy        ; loop if zero (serial is busy)
+            pop af
+            out ($81), a        ; transmit the character
+            ret
+print
+            ld a, (hl)
+            or a
+            ret z
+            call TX
+            inc hl
+            jp print
+
+startupstr            DB "PTx Player.",10,13,0
+loopstr DB "*",10,13,0
+endstr DB "the end.",10,13,0
+
+pause
+  push bc
+  push de
+  push af
+
+  LD BC, $1500            ;Loads BC with hex 1000
+  ; outer: LD DE, $1000            ;Loads DE with hex 1000
+  ; inner: DEC DE                  ;Decrements DE
+  ; LD A, D                 ;Copies D into A
+  ; OR E                    ;Bitwise OR of E with A (now, A = D | E)
+  ; JP NZ, inner            ;Jumps back to Inner: label if A is not zero
+outer DEC BC                  ;Decrements BC
+  LD A, B                 ;Copies B into A
+  OR C                    ;Bitwise OR of C with A (now, A = B | C)
+  JP NZ, outer            ;Jumps back to Outer: label if A is not zero
+
+  pop af
+  pop de
+  pop bc
+  RET                     ;Return from call to this subroutine
+
+MDLADDR EQU $
+	;incbin tunes/through_yeovil.pt3
+	;incbin tunes/nq_-_synchronization_(2015).pt3
+	;incbin tunes/nq_-_louboutin_(2016).pt3
+	incbin tunes/MmcM_-_Recollection_(2015).pt3
+	;incbin tunes/luchibobra_-_three_bad_mice.pt3
+	;incbin tunes/MmcM_-_Agressive_Attack.pt3
 ;Release 0 steps:
 ;02/27/2005
 ;Merging PT2 and PT3 players; debug
