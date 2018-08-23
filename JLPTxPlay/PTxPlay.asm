@@ -2,11 +2,17 @@
 ;(c)2004-2007 S.V.Bulba <vorobey@mail.khstu.ru>
 ;http://bulba.untergrund.net (http://bulba.at.kz)
 
+CPRT	EQU	#51
+DPRT	EQU	#50
+SIOD	EQU	#01
+SIOC	EQU	#03
+
 ;Release number
 Release EQU "1"
 
 ;Conditional assembly
 ;1) Version of ROUT (ZX or MSX standards)
+CPM=1
 ZX=0
 MSX=0
 RC=1
@@ -15,7 +21,7 @@ CurPosCounter=0
 ;3) Allow channels allocation bits at (START+10)
 ACBBAC=0
 ;4) Allow loop checking and disabling
-LoopChecker=0
+LoopChecker=1
 ;5) Insert official identificator
 Id=1
 
@@ -47,17 +53,22 @@ Id=1
 ;Call MUTE or INIT one more time to mute sound after stopping
 ;playing
 
-	ORG #C000
-	;ORG #100
-	; ld hl, startupstr
-  ; call print
+	;ORG #C000
+	IF CPM
+	ORG #100
+	ELSE
+	ORG #8000
+	ENDIF
+
+	;ld hl, startupstr
+        ;call print
 ;Test codes (commented)
 	;LD A,2 ;PT2,ABC,Looped
-	LD A, 0
+	LD A, 1
 	LD (START+10),A
 	CALL START
-	; ld hl, startupstr
-	; call print
+	ld hl, startupstr
+	call print
 ;	EI
 ;_LP	HALT
 _LP	CALL START+5
@@ -71,6 +82,7 @@ _LP	CALL START+5
 	ld hl, endstr
 	call print
 	JR START+8
+	RET
 
 TonA	EQU 0
 TonB	EQU 2
@@ -123,6 +135,12 @@ CHECKLP	LD HL,SETUP
 	INC (HL)
 	LD HL,ChanA+CHP.NtSkCn
 	INC (HL)
+
+	IF CPM
+	CALL MUTE
+	JP 0
+	ENDIF
+
 	ENDIF
 
 MUTE	XOR A
@@ -131,6 +149,7 @@ MUTE	XOR A
 	LD (AYREGS+AmplA),A
 	LD (AYREGS+AmplB),HL
 	JP ROUT
+	RET
 
 INIT
 ;HL - AddressOfModule
@@ -1307,12 +1326,13 @@ ABC
 
 	IF RC
 	XOR A
-	LD C,#D8
+	;LD C,#D8
+	LD C,CPRT
 	LD HL,AYREGS
 LOUT	OUT (C),A
-	LD C,#D0
+	LD C,DPRT
 	OUTI
-	LD C,#D8
+	LD C,CPRT
 	INC A
 	CP 13
 	JR NZ,LOUT
@@ -1320,7 +1340,7 @@ LOUT	OUT (C),A
 	LD A,(HL)
 	AND A
 	RET M
-	LD C,#D0
+	LD C,DPRT
 	OUT (C),A
 	RET
 	ENDIF
@@ -1538,13 +1558,26 @@ VAR0END	EQU VT_+16 ;INIT zeroes from VARS to VAR0END-1
 VARSEND EQU $
 
 
-TX push af
-txbusy     in a,($80)          ; read serial status
-            bit 1,a             ; check status bit 1
-            jr z, txbusy        ; loop if zero (serial is busy)
+TX          push af
+txbusy      in a,(SIOC)        ; read serial status
+            rrca              ; Rotate so RX flag is in carry
+            bit 1,a           ; check status bit 1
+            jr z, txbusy      ; loop if zero (serial is busy)
             pop af
-            out ($81), a        ; transmit the character
+            out (SIOD), a     ; transmit the character
             ret
+IF CPM
+print       LD A, (HL)      ; Load character into E
+            OR A              ; A OR A = A, with Z set if A == 0
+            RET Z             ; Return on Null byte
+            LD C,2            ; Select BDOS function 2, CONOUT
+            LD E, (HL)      ; Load character into E
+            push hl
+            CALL 5            ; Make BDOS call
+            pop hl
+            INC HL
+            JR print
+ELSE
 print
             ld a, (hl)
             or a
@@ -1552,6 +1585,7 @@ print
             call TX
             inc hl
             jp print
+ENDIF
 
 startupstr            DB "PTx Player.",10,13,0
 loopstr DB "*",10,13,0
@@ -1562,16 +1596,11 @@ pause
   push de
   push af
 
-  LD BC, $1500            ;Loads BC with hex 1000
-  ; outer: LD DE, $1000            ;Loads DE with hex 1000
-  ; inner: DEC DE                  ;Decrements DE
-  ; LD A, D                 ;Copies D into A
-  ; OR E                    ;Bitwise OR of E with A (now, A = D | E)
-  ; JP NZ, inner            ;Jumps back to Inner: label if A is not zero
-outer DEC BC                  ;Decrements BC
+  LD BC, $1700            ; Delay constant, should be on top...
+DLOOP DEC BC                  ;Decrements BC
   LD A, B                 ;Copies B into A
   OR C                    ;Bitwise OR of C with A (now, A = B | C)
-  JP NZ, outer            ;Jumps back to Outer: label if A is not zero
+  JP NZ, DLOOP            ;Jumps back to Outer: label if A is not zero
 
   pop af
   pop de
@@ -1579,12 +1608,33 @@ outer DEC BC                  ;Decrements BC
   RET                     ;Return from call to this subroutine
 
 MDLADDR EQU $
-	;incbin tunes/through_yeovil.pt3
-	;incbin tunes/nq_-_synchronization_(2015).pt3
-	;incbin tunes/nq_-_louboutin_(2016).pt3
-	incbin tunes/MmcM_-_Recollection_(2015).pt3
+	;incbin n0music.pt3
+	;incbin tunes/acid.pt2
+	;incbin tunes/altitude.pt3
+	;incbin tunes/backup_forever.pt3
+	;incbin tunes/Bonysoft_-_Sanxion.pt3
+	;incbin tunes/Darkman007 - Wicked child (Castlevania cover) (2014).pt3
+	;incbin tunes/Davos_-_To_star.pt3
+	;incbin tunes/IMP_-_Ecstasy_Track.stc
+	;incbin tunes/isus.pt2
+	;incbin tunes/Karbofos_-_wtopm.pt3
 	;incbin tunes/luchibobra_-_three_bad_mice.pt3
 	;incbin tunes/MmcM_-_Agressive_Attack.pt3
+	;incbin tunes/MmcM - How are you (2016) (DiHalt 2016, 1).pt3
+	;incbin tunes/MmcM - Iteration (2016) (DiHalt 2016, 1).pt3
+	;incbin tunes/MmcM_-_Recollection_(2015).pt3
+	;incbin tunes/MmcM_-_Summer_of_Rain.pt3
+	;incbin tunes/money.pt2
+	;incbin tunes/nq - Day of Victory (2016).pt3
+	;incbin tunes/nq_-_louboutin_(2016).pt3
+	;incbin tunes/nq_-_synchronization_(2015).pt3
+	;incbin tunes/pay.pt3
+	;incbin tunes/Quiet_-_Cheshire_Cat.pt3
+	;incbin tunes/Scalesmann_-_looking_back.pt3
+	;incbin tunes/through_yeovil.pt3
+	incbin tunes/Vedem_-_Antidance.pt3
+	;incbin tunes/wbc_-_BrD.pt3
+
 ;Release 0 steps:
 ;02/27/2005
 ;Merging PT2 and PT3 players; debug
