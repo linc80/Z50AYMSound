@@ -41,10 +41,10 @@ $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 1
 Title "YM2149/AY3-8910 interface for the Z50Bus"
-Date "2018-08-01"
+Date "2018-08-29"
 Rev "3"
 Comp "LiNC"
-Comment1 "This version does not include headers for the digital I/O ports"
+Comment1 ""
 Comment2 ""
 Comment3 "By Jon Langseth / LiNC (c) 2018"
 Comment4 ""

@@ -14,7 +14,11 @@
 
   (page A4)
   (title_block
-    (date 2018-08-03)
+    (title "YM2149/AY3-8910 interface for the Z50Bus")
+    (date 2018-08-29)
+    (rev 3)
+    (company LiNC)
+    (comment 3 "By Jon Langseth / LiNC (c) 2018")
   )
 
   (layers
@@ -8120,7 +8124,7 @@
   (gr_text "YM2149 / AY3-8910" (at 168.68 113.955 270) (layer F.SilkS)
     (effects (font (size 1 1) (thickness 0.2)))
   )
-  (gr_text "GND\nVCC\nB7\nB6\nB5\nB4\nB3\nB2\nB1\nB0\nA7\nA6\nA5\nA4\nA3\nA2\nA1\nA0" (at 126.135 119.67) (layer F.SilkS)
+  (gr_text "CLK\nGND\nVCC\nB7\nB6\nB5\nB4\nB3\nB2\nB1\nB0\nA7\nA6\nA5\nA4\nA3\nA2\nA1\nA0" (at 126.643 118.654) (layer F.SilkS)
     (effects (font (size 1.57 1) (thickness 0.2)) (justify right))
   )
   (gr_text "YM/AY DIGITAL IO" (at 130.58 103.16 90) (layer F.SilkS)
