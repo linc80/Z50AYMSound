@@ -41,7 +41,7 @@ $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 1
 Title "YM2149/AY3-8910 interface for the Z50Bus"
-Date "2018-09-20"
+Date "2018-10-19"
 Rev "4"
 Comp "LiNC"
 Comment1 ""
