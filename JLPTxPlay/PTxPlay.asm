@@ -2,8 +2,8 @@
 ;(c)2004-2007 S.V.Bulba <vorobey@mail.khstu.ru>
 ;http://bulba.untergrund.net (http://bulba.at.kz)
 
-CPRT	EQU	#51
-DPRT	EQU	#50
+CPRT	EQU	#33
+DPRT	EQU	#32
 SIOD	EQU	#01
 SIOC	EQU	#03
 
@@ -1609,22 +1609,18 @@ DLOOP DEC BC                  ;Decrements BC
 
 MDLADDR EQU $
 	;incbin n0music.pt3
-	;incbin tunes/acid.pt2
 	;incbin tunes/altitude.pt3
 	;incbin tunes/backup_forever.pt3
 	;incbin tunes/Bonysoft_-_Sanxion.pt3
 	;incbin tunes/Darkman007 - Wicked child (Castlevania cover) (2014).pt3
 	;incbin tunes/Davos_-_To_star.pt3
-	;incbin tunes/IMP_-_Ecstasy_Track.stc
-	;incbin tunes/isus.pt2
 	;incbin tunes/Karbofos_-_wtopm.pt3
-	;incbin tunes/luchibobra_-_three_bad_mice.pt3
+	incbin tunes/luchibobra_-_three_bad_mice.pt3
 	;incbin tunes/MmcM_-_Agressive_Attack.pt3
 	;incbin tunes/MmcM - How are you (2016) (DiHalt 2016, 1).pt3
 	;incbin tunes/MmcM - Iteration (2016) (DiHalt 2016, 1).pt3
 	;incbin tunes/MmcM_-_Recollection_(2015).pt3
 	;incbin tunes/MmcM_-_Summer_of_Rain.pt3
-	;incbin tunes/money.pt2
 	;incbin tunes/nq - Day of Victory (2016).pt3
 	;incbin tunes/nq_-_louboutin_(2016).pt3
 	;incbin tunes/nq_-_synchronization_(2015).pt3
@@ -1632,7 +1628,7 @@ MDLADDR EQU $
 	;incbin tunes/Quiet_-_Cheshire_Cat.pt3
 	;incbin tunes/Scalesmann_-_looking_back.pt3
 	;incbin tunes/through_yeovil.pt3
-	incbin tunes/Vedem_-_Antidance.pt3
+	;incbin tunes/Vedem_-_Antidance.pt3
 	;incbin tunes/wbc_-_BrD.pt3
 
 ;Release 0 steps:
